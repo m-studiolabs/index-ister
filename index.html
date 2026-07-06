@@ -15,6 +15,7 @@
     --paid:#0E8A55; --paid-bg:#E5F3EC;
     --partial:#B16500; --partial-bg:#FAF0DD;
     --unpaid:#C42A45; --unpaid-bg:#FBE7EB;
+    --upcoming:#5A6473; --upcoming-bg:#EDF0F5;
     --shadow:0 1px 2px rgba(20,24,31,.05), 0 8px 24px -12px rgba(20,24,31,.18);
     --radius:14px;
     --mono:ui-monospace,"SF Mono","Cascadia Mono","Segoe UI Mono",Menlo,Consolas,monospace;
@@ -83,7 +84,7 @@
   .file-pill.err .nm{color:var(--unpaid)}
 
   /* Action row */
-  .actions{display:flex; align-items:center; gap:14px; margin:4px 0 26px; flex-wrap:wrap}
+  .actions{display:flex; align-items:center; gap:14px; margin:4px 0 8px; flex-wrap:wrap}
   button.btn{font-family:inherit; font-size:14.5px; font-weight:620; border-radius:10px; cursor:pointer; border:1px solid transparent; padding:11px 20px; transition:background .15s,border-color .15s,color .15s}
   .btn-primary{background:var(--primary); color:#fff}
   .btn-primary:hover{background:var(--primary-700)}
@@ -94,6 +95,7 @@
   .prog.show{display:block}
   .prog .bar{height:100%; width:0%; background:var(--primary); border-radius:999px; transition:width .2s}
   .status-msg{font-size:13px; color:var(--ink-soft)}
+  .status-file{font-size:12px; color:var(--ink-faint); margin:0 0 18px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-variant-numeric:tabular-nums}
 
   /* Results */
   #results{display:none}
@@ -110,6 +112,8 @@
   .stat.hero .v small{color:#7F8BA8}
   .stat .sub{font-size:12.5px; color:var(--ink-faint); margin-top:3px}
   .stat.hero .sub{color:#8893AE}
+  .stat .sub2{font-size:12px; margin-top:4px}
+  .stat.hero .sub2{color:#AEB9D2}
 
   .recobar{display:flex; height:10px; border-radius:999px; overflow:hidden; margin:18px 0 22px; background:var(--line); box-shadow:inset 0 0 0 1px var(--line)}
   .recobar i{display:block; height:100%}
@@ -132,9 +136,10 @@
   .tab.active .badge{background:rgba(255,255,255,.2)}
   .spacer{flex:1}
   .search{position:relative}
-  .searchrow{margin:0 0 13px}
-  .searchrow .search{display:block; width:56%; min-width:320px}
+  .searchrow{margin:0 0 13px; display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+  .searchrow .search{display:block; width:56%; min-width:320px; flex:none}
   .searchrow .search input{width:100%}
+  .searchrow .amtoggle:first-of-type{margin-left:auto}
   .search input{font-family:inherit; font-size:13.5px; border:1px solid var(--line-strong); background:var(--surface);
     border-radius:9px; padding:8px 12px 8px 32px; width:210px; color:var(--ink)}
   .search input:focus{outline:none; border-color:var(--primary)}
@@ -165,6 +170,7 @@
   .chip.paid{background:var(--paid-bg); color:var(--paid)} .chip.paid i{background:var(--paid)}
   .chip.part{background:var(--partial-bg); color:var(--partial)} .chip.part i{background:var(--partial)}
   .chip.unpaid{background:var(--unpaid-bg); color:var(--unpaid)} .chip.unpaid i{background:var(--unpaid)}
+  .chip.upco{background:var(--upcoming-bg); color:var(--upcoming)} .chip.upco i{background:var(--upcoming)}
   .warn{display:inline-grid;place-items:center;width:17px;height:17px;border-radius:50%;background:var(--partial-bg);
     color:var(--partial);font-size:11px;font-weight:800;margin-left:7px;cursor:help; vertical-align:middle}
   .approx{display:inline-block;margin-left:7px;font-size:10.5px;font-weight:700;color:var(--partial);
@@ -187,10 +193,55 @@
     .stat.hero{grid-column:1/-1}
     .search input{width:140px}
     .searchrow .search{width:100%; min-width:0}
+    .searchrow .amtoggle:first-of-type{margin-left:0}
     header.app{padding-right:0}
     .ver{position:static; margin-top:10px}
   }
   @media (prefers-reduced-motion:reduce){ *{animation:none!important; transition:none!important} }
+
+  /* ---- Detail firmy (modal) ---- */
+  .modal-backdrop{position:fixed; inset:0; background:rgba(20,24,31,.5); z-index:50; display:flex; align-items:center; justify-content:center; padding:20px}
+  .modal{background:var(--surface); border-radius:16px; box-shadow:0 24px 70px -22px rgba(20,24,31,.55); width:min(1180px,100%); max-height:88vh; overflow-y:auto; overflow-x:hidden}
+  .modal-head{display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding:18px 20px 14px; border-bottom:1px solid var(--line)}
+  .modal-title{font-size:17px; font-weight:700; letter-spacing:-.01em}
+  .modal-subtitle{font-size:12.5px; color:var(--ink-faint); margin-top:2px}
+  .modal-close{border:1px solid var(--line-strong); background:var(--surface); width:30px; height:30px; border-radius:8px; cursor:pointer; color:var(--ink-soft); font-size:14px; line-height:1; flex:none}
+  .modal-close:hover{background:var(--surface-2); color:var(--ink)}
+  .modal-controls{padding:14px 20px 2px}
+  .modal-body{padding-bottom:2px}
+  .co-sel-lbl{display:flex; flex-direction:column; gap:5px; font-size:11px; font-weight:600; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.02em}
+  .co-sel-lbl select{font:inherit; font-size:14px; font-weight:500; text-transform:none; letter-spacing:normal; color:var(--ink); padding:9px 12px; border:1px solid var(--line-strong); border-radius:10px; background:var(--surface); cursor:pointer; width:100%}
+  .co-summary{display:flex; gap:10px; flex-wrap:wrap; padding:14px 20px}
+  .co-stat{flex:1; min-width:118px; background:var(--surface-2); border:1px solid var(--line); border-radius:12px; padding:11px 13px; cursor:help}
+  .co-stat .k{font-size:11px; font-weight:600; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.02em}
+  .co-stat .v{font-size:18px; font-weight:700; margin-top:3px; font-variant-numeric:tabular-nums; letter-spacing:-.01em}
+  .co-stat .sub{font-size:11px; color:var(--ink-faint); margin-top:1px}
+  .co-stat .sub.warn{color:var(--partial); font-weight:600; font-size:10px; white-space:nowrap}
+  .co-stat .sub .nb{white-space:nowrap}
+  .co-stat.neg .v{color:var(--unpaid)} .co-stat.pos .v{color:var(--paid)}
+  .co-split{display:flex; border-top:1px solid var(--line); align-items:stretch}
+  .co-col{flex:1; min-width:0; display:flex; flex-direction:column}
+  .co-col:first-child{border-right:1px solid var(--line)}
+  .co-col-head{padding:11px 18px; font-size:12px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.02em; background:var(--surface-2); border-bottom:1px solid var(--line)}
+  .co-count{color:var(--ink-faint); font-weight:600}
+  .co-list{padding:4px 0}
+  .co-item{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:9px 18px; border-bottom:1px solid var(--line)}
+  .co-item:last-child{border-bottom:none}
+  .co-item.unmatched{background:var(--partial-bg)}
+  .co-item.clickable{cursor:pointer}
+  .co-item.clickable:hover{background:var(--surface-2)}
+  .co-item.clickable .openico{margin-left:0}
+  .co-item.clickable:hover .openico{opacity:1; color:var(--primary)}
+  .co-item-main{min-width:0; display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+  .co-num,.co-date{font-weight:600; font-size:13px; color:var(--ink); font-variant-numeric:tabular-nums}
+  .co-due,.co-vs{font-size:12px; color:var(--ink-faint); font-variant-numeric:tabular-nums}
+  .co-item-side{display:flex; align-items:center; gap:8px; white-space:nowrap; font-size:13px; font-weight:640; font-variant-numeric:tabular-nums}
+  .co-empty{padding:26px 18px; text-align:center; color:var(--ink-faint); font-size:13px}
+  @media (max-width:760px){
+    .modal{max-height:92vh}
+    .co-split{flex-direction:column}
+    .co-col:first-child{border-right:none; border-bottom:1px solid var(--line)}
+  }
 </style>
 </head>
 <body>
@@ -201,7 +252,7 @@
       <h1>Párovanie faktúr a platieb</h1>
       <p>Nahrajte vystavené faktúry a výpisy z účtu. Nástroj ich spáruje a vypíše, kto pravdepodobne ešte nezaplatil.</p>
     </div>
-    <div class="ver" id="ver">verzia 3.4</div>
+    <div class="ver" id="ver">verzia 5.2</div>
   </header>
 
   <section class="uploads">
@@ -240,6 +291,7 @@
     <div class="prog" id="prog"><div class="bar" id="prog-bar"></div></div>
     <div class="status-msg" id="status"></div>
   </div>
+  <div class="status-file" id="status-file"></div>
 
   <section id="results">
     <div class="summary">
@@ -247,6 +299,7 @@
         <div class="k">Nezaplatená suma</div>
         <div class="v tnum" id="s-owed">0,00 <small>€</small></div>
         <div class="sub" id="s-owed-sub">0 neuhradených faktúr</div>
+        <div class="sub sub2" id="s-upcoming-sub" style="display:none"></div>
       </div>
       <div class="stat">
         <div class="k">Neplatiči</div>
@@ -285,9 +338,7 @@
         <button class="tab" data-tab="payments">Prijaté platby <span class="badge" id="b-pay">0</span></button>
       </div>
       <div class="spacer"></div>
-      <label class="amtoggle" title="Ak faktúra nemá platbu s rovnakým variabilným symbolom, skúsi sa spárovať s voľnou platbou rovnakej sumy (po dátume vystavenia). Takéto páry sú označené „≈ podľa sumy“ – overte ich. Najčastejšie ide o prípady, keď klient pri úhrade zabudol uviesť alebo nesprávne zadal variabilný symbol.">
-        <input type="checkbox" id="amt-toggle" checked> Párovať aj podľa sumy
-      </label>
+      <button class="btn btn-ghost" id="co-detail">Detail platieb podľa firmy</button>
       <button class="btn btn-ghost" id="copy">Kopírovať</button>
       <button class="btn btn-ghost" id="csv">Export XLSX</button>
     </div>
@@ -297,6 +348,12 @@
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
         <input type="text" id="search" placeholder="Hľadať meno alebo VS…">
       </div>
+      <label class="amtoggle" title="Ak faktúra nemá platbu s rovnakým variabilným symbolom, skúsi sa spárovať s voľnou platbou rovnakej sumy (po dátume vystavenia). Takéto páry sú označené „≈ podľa sumy“ – overte ich. Najčastejšie ide o prípady, keď klient pri úhrade zabudol uviesť alebo nesprávne zadal variabilný symbol.">
+        <input type="checkbox" id="amt-toggle" checked> Párovať aj podľa sumy
+      </label>
+      <label class="amtoggle" title="Navyše skúsi spárovať faktúru s voľnou platbou, keď suma sedí presne a variabilný symbol je takmer rovnaký – buď preklep (líši sa o jednu číslicu, číslica navyše/chýba, prehodené poradie), alebo skrátený VS (klient uviedol len prvých pár číslic). Takéto páry sú označené „≈ VS (overiť)“ a treba ich skontrolovať.">
+        <input type="checkbox" id="vsf-toggle" checked> Párovať aj pri drobnej odchýlke VS
+      </label>
     </div>
 
     <div class="tabtotal" id="tabtotal"></div>
@@ -316,6 +373,36 @@
 
 <div class="toast" id="toast"></div>
 
+<div class="modal-backdrop" id="co-modal" style="display:none">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">Detail platieb podľa firmy</div>
+        <div class="modal-subtitle">Vystavené faktúry a prijaté platby jednej firmy vedľa seba.</div>
+      </div>
+      <button class="modal-close" id="co-close" aria-label="Zavrieť">✕</button>
+    </div>
+    <div class="modal-controls">
+      <label class="co-sel-lbl">Firma
+        <select id="co-select"></select>
+      </label>
+    </div>
+    <div class="modal-body">
+      <div class="co-summary" id="co-summary"></div>
+      <div class="co-split">
+        <div class="co-col">
+          <div class="co-col-head">Vystavené faktúry <span class="co-count" id="co-inv-count"></span></div>
+          <div class="co-list" id="co-invoices"></div>
+        </div>
+        <div class="co-col">
+          <div class="co-col-head">Prijaté platby <span class="co-count" id="co-pay-count"></span></div>
+          <div class="co-list" id="co-payments"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 "use strict";
 const pdfjs = window.pdfjsLib;
@@ -331,6 +418,7 @@ const state = {
   tab: "unpaid",
   search: "",
   amountMatch: true,
+  vsFuzzy: true,
   sort: {key:"owed", dir:-1}
 };
 
@@ -370,28 +458,49 @@ function groupRows(items){
   return rows;
 }
 async function pdfRows(buf){
-  const doc = await pdfjs.getDocument({data:buf, useWorkerFetch:false, isEvalSupported:false}).promise;
+  const task = pdfjs.getDocument({data:buf, useWorkerFetch:false, isEvalSupported:false});
+  const doc = await task.promise;
   const pages=[];
   for(let p=1;p<=doc.numPages;p++){
     const page = await doc.getPage(p);
     const tc = await page.getTextContent();
     pages.push(groupRows(tc.items));
+    page.cleanup && page.cleanup();
   }
+  try{ doc.destroy && doc.destroy(); }catch(_){}   // uvoľni pamäť (dôležité pri veľkých dávkach)
   return pages;
+}
+// časový limit pre jedno PDF – ak sa čítanie zasekne, po `ms` sa vyhodí chyba a súbor sa preskočí
+function withTimeout(promise, ms, label){
+  let tid;
+  const timeout = new Promise((_,rej)=>{ tid=setTimeout(()=>rej(new Error("časový limit ("+(ms/1000)+"s)")), ms); });
+  return Promise.race([promise, timeout]).finally(()=>clearTimeout(tid));
 }
 
 /* ---------- invoice parser ---------- */
 function parseInvoice(rows, fname){
   const full = rows.map(r=>r.text).join("\n");
   const find = rx => { const m=rx.exec(full); return m?m[1]:null; };
-  let vs = find(/\bVS:?\s*([0-9]{3,})/i);
-  let number = find(/doklad[^0-9]{0,6}([0-9]{5,})/i) || find(/č[^0-9]{0,3}([0-9]{5,})/i) || vs;
+  const DATE1=/^\d{1,2}\.\d{1,2}\.\d{4}$/, DATE_IN=/(\d{1,2}\.\d{1,2}\.\d{4})/;
+  // prvý item, ktorého text vyhovuje rx (+ jeho riadok)
+  const labelItem = rx => { for(const r of rows){ for(const it of r.items){ if(rx.test(it.str)) return {it,row:r}; } } return null; };
+  // hodnota v stĺpci pod hlavičkou (podobné x, najbližší riadok nižšie) – napr. VS pod „Variabilný symbol"
+  const belowLabel = (rx, valRx, xtol=45) => { const L=labelItem(rx); if(!L) return null; let best=null,bY=-Infinity; for(const r of rows){ if(r.y>=L.row.y-1) continue; for(const it of r.items){ if(valRx.test(it.str) && Math.abs(it.x-L.it.x)<=xtol && r.y>bY){ bY=r.y; best=it.str; } } } return best; };
+  // dátum k popiske: najprv v tom istom riadku vpravo (inline formát), inak v stĺpci pod popiskou (tabuľkový formát)
+  const dateFor = rx => { const L=labelItem(rx); if(!L) return null; const rt=L.row.items.filter(it=>it.x>L.it.x).map(it=>it.str).join(" "); const m=DATE_IN.exec(rt); if(m) return m[1]; let best=null,bY=-Infinity; for(const r of rows){ if(r.y>=L.row.y-1) continue; for(const it of r.items){ if(DATE1.test(it.str) && Math.abs(it.x-L.it.x)<=45 && r.y>bY){ bY=r.y; best=it.str; } } } return best; };
+
+  let vs = find(/\bVS:?\s*([0-9]{3,})/i) || belowLabel(/Variabiln/i, /^[0-9]{3,}$/);
+  let number = find(/Fakt[uú]ra\s*[čc][ií]slo\s*:?\s*([0-9]{4,})/i)
+            || find(/doklad[^0-9]{0,6}([0-9]{5,})/i)
+            || find(/č[^0-9]{0,3}([0-9]{5,})/i) || vs;
   if(!vs) vs = number;
   const totM = /hrade[^\S\n]*([0-9][0-9 \u00a0.,]*)\s*\u20ac/i.exec(full)
-            || /hrade[^\S\n]*([0-9][0-9 \u00a0.,]*)/i.exec(full);
+            || /hrade[^\S\n]*([0-9][0-9 \u00a0.,]*)/i.exec(full)
+            || /fakturovan[áa]\s+suma[^0-9]{0,10}([0-9][0-9 \u00a0.,]*)/i.exec(full)
+            || /Celkov[áa]\s+suma\s+s\s+DPH[^0-9]{0,10}([0-9][0-9 \u00a0.,]*)/i.exec(full);
   const total = totM ? parseEuro(totM[1]) : null;
-  const issue = find(/vystavenia:?\s*([0-9]{1,2}\.[0-9]{1,2}\.[0-9]{4})/i);
-  const due   = find(/splatnosti:?\s*([0-9]{1,2}\.[0-9]{1,2}\.[0-9]{4})/i);
+  const issue = dateFor(/vyhotoven|vystaven/i);
+  const due   = dateFor(/splatnos/i);
 
   // customer name: right column, first non-empty row below "Odberate"
   let odb=null;
@@ -412,7 +521,7 @@ function parseInvoice(rows, fname){
 /* ---------- bank statement parser ---------- */
 const DATE_START = /^\s*(\d{1,2}\.\d{1,2}\.\d{4})\b/;
 const MONEY = /(-?)\s?(\d[\d \u00a0]*,\d{2})(?!\d)/g;
-function parseStatement(pages, fname){
+function parseStatementFio(pages, fname){
   const out=[];
   for(const rows of pages){
     if(!rows.length) continue;
@@ -452,6 +561,107 @@ function parseStatement(pages, fname){
     }
   }
   return out;
+}
+
+/* ---------- ČSOB výpis (iný štýl než Fio) ---------- */
+const CSOB_DATE = /^\s*(\d{1,2})\.\s+(\d{1,2})\.(?:\s|$)/;   // napr. "3. 12." (deň. mesiac., bez roka)
+function parseStatementCSOB(pages, fname){
+  const full = pages.map(groupToText).join("\n");
+  const ym = /Obdobie:[\s\S]{0,80}?(\d{4})/.exec(full) || /Rok\/[\u010dc]\.\s*v[\u00fdy]pisu:\s*(\d{4})/.exec(full);
+  const year = ym ? ym[1] : String(new Date().getFullYear());
+  const out=[];
+  for(const rows of pages){
+    for(let i=0;i<rows.length;i++){
+      const r=rows[i];
+      const dm=CSOB_DATE.exec(r.text);
+      if(!dm) continue;
+      let last=null, mm; MONEY.lastIndex=0;   // suma = najpravejšia peňažná hodnota na riadku
+      while((mm=MONEY.exec(r.text))!==null) last=mm;
+      if(!last) continue;
+      const amount=(last[1]==="-"?-1:1)*(parseEuro(last[2])||0);
+      if(amount<=0) continue;   // len prijaté (kreditné) platby; poplatky a dane (mínus) sa neberú
+      const date=`${dm[1].padStart(2,"0")}.${dm[2].padStart(2,"0")}.${year}`;
+      let name=null;
+      const nmm=/Prijat[\u00e1a]\s+platba\s+(.+?)\s+-?\d[\d \u00a0]*,\d{2}\s*$/i.exec(r.text);
+      if(nmm) name=nmm[1].trim();
+      let vs="";   // VS = samostatné číslo v riadkoch pod transakciou (do ďalšej transakcie)
+      for(let j=i+1;j<rows.length;j++){
+        if(CSOB_DATE.test(rows[j].text)) break;
+        const vm2=/^\s*(\d{5,12})\s*$/.exec(rows[j].text);
+        if(vm2){ vs=vm2[1]; break; }
+      }
+      out.push({ date, dateObj:parseDate(date), amount, vs, name:name||"(neuvedené)", file:fname });
+    }
+  }
+  return out;
+}
+
+// dispatcher: Fio má prednosť (nič sa mu nemení); ČSOB sa použije len ak Fio nič nenašiel a výpis vyzerá ako ČSOB
+function parseStatement(pages, fname){
+  const fio = parseStatementFio(pages, fname);
+  if(fio.length) return fio;
+  const full = pages.map(groupToText).join("\n");
+  if(/[\u010cC]SOB|CEKOSKBX|Po[\u010dc]et\s+kredit|Prijat[\u00e1a]\s+platba/i.test(full)) return parseStatementCSOB(pages, fname);
+  return fio;
+}
+
+/* ---------- splátkový kalendár (dohoda o platbách) — 1 PDF = viac faktúr ---------- */
+// riadok tabuľky: dodania | splatnosti | mesiac | VS | základ | DPH | spolu s DPH
+const CAL_ROW = /^\s*(\d{1,2}\.\d{1,2}\.\d{4})\s+(\d{1,2}\.\d{1,2}\.\d{4})\s+(\d{1,3})\s+(\d+)\s+(.+)$/;
+function parseCalendar(pages, fname){
+  const headerFull = (pages[0]||[]).length ? groupToText(pages[0]) : "";
+  let customer=null;
+  const cm=/N[\u00e1a]jomca:?[^\S\n]*([^\n]+)/i.exec(headerFull);
+  if(cm) customer=cm[1].trim();
+  // dátum vystavenia kalendára = POSLEDNÝ "dňa DD.MM.RRRR" (dokumentový dátum, nie dátum zmluvy hore)
+  let issue=null, dmm; const DRE=/d[\u0148n]a[^\S\n]*(\d{1,2}\.\d{1,2}\.\d{4})/gi;
+  while((dmm=DRE.exec(headerFull))!==null) issue=dmm[1];
+  const idt=issue?parseDate(issue):null; const issueTime=idt?idt.getTime():0;
+  const company=(customer||"").toLowerCase().replace(/\s+/g," ").trim();
+  const out=[];
+  for(const page of pages){
+    for(const r of page){
+      const m=CAL_ROW.exec(r.text);
+      if(!m) continue;
+      const dodania=m[1], due=m[2], vs=m[4], amounts=m[5];
+      let last=null, mm; const MRE=/(\d[\d \u00a0]*,\d{2})/g;   // suma "Spolu s DPH" = posledná hodnota v riadku (zvládne aj tisíce)
+      while((mm=MRE.exec(amounts))!==null) last=mm[1];
+      if(!last) continue;
+      const total=parseEuro(last);
+      if(total==null) continue;
+      const dd=parseDate(dodania);
+      const period=dd ? dd.getFullYear()+"-"+String(dd.getMonth()+1).padStart(2,"0") : (m[3]||"");   // fakturovaný mesiac
+      out.push({file:fname, number:vs, vs:onlyDigits(vs), total, issue, due,
+                customer:customer||"(neznámy nájomca)",
+                _cal:true, _company:company, _period:period, _issueTime:issueTime});
+    }
+  }
+  return out;
+}
+function groupToText(rows){ return rows.map(r=>r.text).join("\n"); }
+
+// vráti pole faktúr z PDF: 1 pri bežnej faktúre, viac pri splátkovom kalendári
+function parseInvoicesFromPdf(pages, fname){
+  const full = pages.map(groupToText).join("\n");
+  if(/DOHODA O PLATB|spl[\u00e1a]tkov|kalend[\u00e1a]r/i.test(full)){
+    const rows=parseCalendar(pages, fname);
+    if(rows.length) return rows;   // ak sa nič nenašlo, skús ako bežnú faktúru
+  }
+  return [ parseInvoice(pages[0]||[], fname) ];
+}
+
+// Ak je pre tú istú firmu viac splátkových kalendárov, za každý fakturovaný mesiac
+// ponechá len riadok z NAJNOVŠIEHO kalendára (podľa dátumu vystavenia kalendára).
+// Týka sa LEN splátkových kalendárov (_cal); bežných faktúr sa nedotýka.
+function resolveCalendars(invoices){
+  const keep=new Map(); const rest=[];
+  for(const inv of invoices){
+    if(!inv._cal){ rest.push(inv); continue; }
+    const k=(inv._company||"")+"|"+(inv._period||"");
+    const cur=keep.get(k);
+    if(!cur || (inv._issueTime||0) >= (cur._issueTime||0)) keep.set(k, inv);
+  }
+  return rest.concat([...keep.values()]);
 }
 
 /* ---------- zip / file intake ---------- */
@@ -528,39 +738,69 @@ async function intake(files, target){
 
 /* ---------- run ---------- */
 $("#run").onclick = async ()=>{
-  const prog=$("#prog"), bar=$("#prog-bar"), st=$("#status");
-  $("#run").disabled=true; prog.classList.add("show"); bar.style.width="2%";
+  const prog=$("#prog"), bar=$("#prog-bar"), st=$("#status"), sf=$("#status-file");
+  $("#run").disabled=true; prog.classList.add("show"); bar.style.width="2%"; sf.textContent="";
   state.invoices=[]; state.payments=[];
   const failed=[], unrecognized=[], dupInvoices=[];
   const seenKey=new Set();
   const total = state.faktFiles.length + state.vypFiles.length; let done=0;
-  const tick=lbl=>{ done++; bar.style.width = Math.round(4+done/total*92)+"%"; st.textContent=lbl; };
+  const tick=()=>{ done++; bar.style.width = Math.round(4+done/total*92)+"%"; };
+  const PDF_TIMEOUT = 25000;   // 25 s na jedno PDF; ak sa zasekne, preskočí sa
+  const slow=[];
+  const log=(...a)=>{ try{ console.log("[Párovanie]", ...a); }catch(_){} };
+  log(`ŠTART · faktúry: ${state.faktFiles.length} · výpisy: ${state.vypFiles.length}`);
 
   try{
+    let i=0;
     for(const f of state.faktFiles){
+      i++;
+      st.textContent = `Čítam faktúry… (${done+1}/${total})`;
+      sf.textContent = f.name;   // názov na samostatnom riadku – vidno, na čom prípadne visí
+      const t0 = Date.now();
       try{
-        const pages=await pdfRows(f.buf.slice(0));
-        const inv=parseInvoice(pages[0], f.name);
-        inv._buf = f.buf;   // ponechaj referenciu na PDF, aby sa dalo otvoriť po kliknutí
-        const looksLikeInvoice = inv.total!=null && (inv.vs || inv.number);
-        if(!looksLikeInvoice){ unrecognized.push(f.name); }
-        else {
-          // duplikát = zhodné číslo, VS, dátum vystavenia aj suma
-          const key = [inv.number||"", inv.vs||"", inv.issue||"", inv.total!=null?inv.total.toFixed(2):""].join("|");
+        const pages=await withTimeout(pdfRows(f.buf.slice(0)), PDF_TIMEOUT, f.name);
+        const invs=parseInvoicesFromPdf(pages, f.name);   // 1 pri bežnej faktúre, viac pri splátkovom kalendári
+        let anyOk=false;
+        for(const inv of invs){
+          inv._buf = f.buf;   // referencia na PDF (klik → otvorí zdrojové PDF)
+          if(!(inv.total!=null && (inv.vs || inv.number))) continue;   // nevyzerá ako faktúra → preskoč
+          anyOk=true;
+          // duplikát = zhodné číslo, VS, dátum vystavenia, suma aj splatnosť (splátky sa líšia splatnosťou)
+          const key = [inv.number||"", inv.vs||"", inv.issue||"", inv.total!=null?inv.total.toFixed(2):"", inv.due||""].join("|");
           if(seenKey.has(key)) dupInvoices.push(f.name);
           else { seenKey.add(key); state.invoices.push(inv); }
         }
+        if(!anyOk){ unrecognized.push(f.name); log(`  ⚠ nerozpoznaná: ${f.name}`); }
+        const dt=Date.now()-t0;
+        if(dt>4000){ slow.push({name:f.name, s:(dt/1000).toFixed(1)}); log(`  ⏱ pomalé (${(dt/1000).toFixed(1)}s): ${f.name}`); }
       }
-      catch(e){ failed.push(f.name); }
-      tick(`Čítam faktúry… (${done}/${total})`);
+      catch(e){ failed.push(f.name); log(`  ✖ CHYBA/timeout: ${f.name} — ${e&&e.message}`); }
+      tick();
     }
+    let j=0;
     for(const f of state.vypFiles){
-      try{ const pages=await pdfRows(f.buf.slice(0)); state.payments.push(...parseStatement(pages, f.name)); }
-      catch(e){ failed.push(f.name); }
-      tick(`Čítam výpisy… (${done}/${total})`);
+      j++;
+      st.textContent = `Čítam výpisy… (${done+1}/${total})`;
+      sf.textContent = f.name;
+      const t0=Date.now();
+      try{
+        const pages=await withTimeout(pdfRows(f.buf.slice(0)), PDF_TIMEOUT, f.name);
+        state.payments.push(...parseStatement(pages, f.name));
+        const dt=Date.now()-t0;
+        if(dt>4000){ slow.push({name:f.name, s:(dt/1000).toFixed(1)}); log(`  ⏱ pomalé (${(dt/1000).toFixed(1)}s): ${f.name}`); }
+      }
+      catch(e){ failed.push(f.name); log(`  ✖ CHYBA/timeout: ${f.name} — ${e&&e.message}`); }
+      tick();
     }
-    bar.style.width="100%";
-    state.notices = {unrecognized, dupInvoices, failed};
+    bar.style.width="100%"; sf.textContent="";
+    log(`HOTOVO · chybné: ${failed.length} · nerozpoznané: ${unrecognized.length} · pomalé: ${slow.length}`);
+    if(failed.length) log("Chybné/preskočené súbory:", failed);
+    if(slow.length) log("Pomalé súbory:", slow);
+    // splátkové kalendáre: novší kalendár prepíše staršie mesiace tej istej firmy
+    const calBefore = state.invoices.filter(x=>x._cal).length;
+    state.invoices = resolveCalendars(state.invoices);
+    const supersededCal = calBefore - state.invoices.filter(x=>x._cal).length;
+    state.notices = {unrecognized, dupInvoices, failed, supersededCal};
     reconcile();
     // vždy zobraz záložku Neplatiči a vyčisti hľadanie
     state.tab="unpaid"; state.search=""; state.sort={key:"owed",dir:-1};
@@ -585,6 +825,27 @@ $("#run").onclick = async ()=>{
 };
 
 /* ---------- reconcile ---------- */
+// drobná odchýlka VS: preklep (1 znak) alebo skrátený VS (kratší je prefixom dlhšieho, min. 6 číslic)
+function vsTypo(a,b){
+  if(a===b) return false;
+  const la=a.length, lb=b.length;
+  if(Math.abs(la-lb)>1) return false;
+  if(la===lb){
+    const diff=[]; for(let i=0;i<la;i++) if(a[i]!==b[i]) diff.push(i);
+    if(diff.length===1) return true;   // zámena jednej číslice
+    if(diff.length===2 && diff[1]===diff[0]+1 && a[diff[0]]===b[diff[1]] && a[diff[1]]===b[diff[0]]) return true;   // prehodené susedné číslice
+    return false;
+  }
+  const lng=la>lb?a:b, sht=la>lb?b:a;   // číslica navyše / chýbajúca
+  for(let i=0;i<lng.length;i++){ if(lng.slice(0,i)+lng.slice(i+1)===sht) return true; }
+  return false;
+}
+function vsPrefix(a,b){   // skrátený VS: kratší je začiatkom dlhšieho, aspoň 6 číslic
+  const sht=a.length<=b.length?a:b, lng=a.length<=b.length?b:a;
+  return sht.length>=6 && sht!==lng && lng.startsWith(sht);
+}
+function vsCloseness(a,b){ if(!a||!b) return Infinity; if(vsTypo(a,b)) return 1; if(vsPrefix(a,b)) return 2; return Infinity; }
+
 function reconcile(){
   const incoming = state.payments.filter(p=>p.amount>0);
   incoming.forEach(p=>{ p.matched=false; p.matchedBy=null; });
@@ -595,20 +856,47 @@ function reconcile(){
 
   const results = state.invoices.map(inv=>({...inv, pays:[], paid:0, status:"unpaid", matchedBy:null, candidates:0}));
 
-  // PASS 1 — variabilný symbol (spoľahlivé)
+  // PASS 1 — variabilný symbol; platby sa "spotrebúvajú" (jedna platba → jedna faktúra),
+  // aby pri opakovanom VS (napr. splátky s rovnakým VS) nesadla tá istá platba na všetky splátky
   const byVs={};
   for(const p of incoming){ if(p.vs)(byVs[p.vs]=byVs[p.vs]||[]).push(p); }
-  for(const res of results){
-    if(!res.vs) continue;
-    const pays = byVs[res.vs];
-    if(pays && pays.length){
-      pays.forEach(p=>{ p.matched=true; p.matchedBy="vs"; });
-      res.pays = pays.slice();
-      res.matchedBy = "vs";
+  // faktúry so zhodným VS spracuj podľa splatnosti (skôr splatné sa uhradia prv)
+  const vsOrder = results.filter(r=>r.vs).slice().sort((a,b)=>{
+    const da=parseDate(a.due), db=parseDate(b.due); return (da?da.getTime():0)-(db?db.getTime():0);
+  });
+  for(const res of vsOrder){
+    const pool = byVs[res.vs]; if(!pool) continue;
+    const tot = res.total||0; let sum=0;
+    for(const p of pool){
+      if(p.matched) continue;
+      p.matched=true; p.matchedBy="vs"; res.pays.push(p); sum+=p.amount;
+      if(sum >= tot-0.005) break;   // dosť na pokrytie tejto faktúry
+    }
+    if(res.pays.length) res.matchedBy="vs";
+  }
+
+  // PASS 2 — drobná odchýlka VS (preklep alebo skrátený VS) + PRESNE sediaca suma.
+  // Silnejší dôkaz než len suma (sedí aj takmer celý VS), preto beží PRED párovaním podľa sumy. Len ako návrh na overenie.
+  if(state.vsFuzzy){
+    const pending = results.filter(r=>r.pays.length===0 && r.total!=null && r.vs)
+      .sort((a,b)=>{ const da=parseDate(a.due), db=parseDate(b.due); return (da?da.getTime():0)-(db?db.getTime():0); });
+    for(const res of pending){
+      const tot=res.total; let best=null, bestScore=Infinity;
+      const dueT=(()=>{ const d=parseDate(res.due); return d?d.getTime():0; })();
+      for(const p of incoming){
+        if(p.matched || p.amount<=0 || !p.vs) continue;
+        if(Math.abs(p.amount - tot) > 0.005) continue;         // kotva: suma musí sedieť presne
+        const close = vsCloseness(p.vs, res.vs);
+        if(close===Infinity) continue;                          // VS nie je dostatočne blízky
+        const gap = Math.abs((p.dateObj?p.dateObj.getTime():0) - dueT);
+        const score = close*1e15 + gap;                         // najprv menšia odchýlka VS, potom bližší dátum k splatnosti
+        if(score < bestScore){ bestScore=score; best=p; }
+      }
+      if(best){ best.matched=true; best.matchedBy="vsfuzzy"; res.pays=[best]; res.matchedBy="vsfuzzy"; }
     }
   }
 
-  // PASS 2 — podľa sumy (len pre faktúry bez VS zhody, len voľné platby; platba nesmie byť pred vystavením)
+  // PASS 3 — podľa sumy (len pre faktúry bez zhody, len voľné platby; platba nesmie byť pred vystavením)
   if(state.amountMatch){
     const pending = results.filter(r=>r.pays.length===0 && r.total);
     pending.sort((a,b)=>{ const da=parseDate(a.issue||a.due), db=parseDate(b.issue||b.due);
@@ -628,6 +916,7 @@ function reconcile(){
   }
 
   // finalize
+  const today0=new Date(); today0.setHours(0,0,0,0);   // dnešný deň (hranica pre "pred splatnosťou")
   for(const res of results){
     const paid = res.pays.reduce((s,p)=>s+p.amount,0);
     res.paid = paid;
@@ -638,6 +927,8 @@ function reconcile(){
     else if(paid<tot) res.status="partial";
     else res.status="overpaid";
     const due=parseDate(res.due);
+    // nezaplatená faktúra, ktorej splatnosť ešte len príde (dnes alebo neskôr) → nie je neplatič
+    if(res.status==="unpaid" && due && due>=today0) res.status="upcoming";
     res.outside = res.status==="unpaid" && due && minD && maxD && (due<minD || due>maxD);
     res.owed = (res.status==="unpaid"||res.status==="partial") ? Math.max(tot-paid,0) : 0;
     res.lastPayDate = res.pays.length ? res.pays.map(p=>p.date).slice(-1)[0] : null;
@@ -653,13 +944,17 @@ function render(){
   const unpaid=r.filter(x=>x.status==="unpaid");
   const partial=r.filter(x=>x.status==="partial");
   const paid=r.filter(x=>x.status==="paid"||x.status==="overpaid");
+  const upcoming=r.filter(x=>x.status==="upcoming");   // nezaplatené, ale ešte pred splatnosťou
   const incoming=state.payments.filter(p=>p.amount>0);
   const owed = unpaid.reduce((s,x)=>s+(x.total||0),0) + partial.reduce((s,x)=>s+x.owed,0);
   const debtors = new Set([...unpaid,...partial].map(x=>x.customer)).size;
   const recv = incoming.reduce((s,p)=>s+p.amount,0);
 
   $("#s-owed").innerHTML = owed.toLocaleString("sk-SK",{minimumFractionDigits:2,maximumFractionDigits:2})+' <small>€</small>';
-  $("#s-owed-sub").textContent = `${unpaid.length+partial.length} ${plur(unpaid.length+partial.length,"neuhradená faktúra","neuhradené faktúry","neuhradených faktúr")}`;
+  $("#s-owed-sub").textContent = `${unpaid.length+partial.length} ${plur(unpaid.length+partial.length,"neuhradená faktúra po splatnosti","neuhradené faktúry po splatnosti","neuhradených faktúr po splatnosti")}`;
+  const uEl=$("#s-upcoming-sub");
+  if(upcoming.length){ uEl.style.display=""; uEl.textContent = `+ ${upcoming.length} ${plur(upcoming.length,"faktúra pred splatnosťou","faktúry pred splatnosťou","faktúr pred splatnosťou")} · ${fmtEur(upcoming.reduce((s,x)=>s+(x.total||0),0))}`; }
+  else uEl.style.display="none";
   $("#s-debtors").textContent = debtors;
   $("#s-debtors-sub").textContent = plur(debtors,"odberateľ","odberatelia","odberateľov");
   $("#s-paid").textContent = paid.length;
@@ -687,6 +982,8 @@ function render(){
     ? `Páruje sa najprv podľa variabilného symbolu; ak faktúra nemá zhodnú platbu, skúsi sa voľná platba rovnakej sumy (po dátume vystavenia) – tieto sú označené „≈ podľa sumy“ a odporúčame ich overiť.`
     : `Páruje sa iba podľa variabilného symbolu (párovanie podľa sumy je vypnuté).`;
   if(amtCount) foot += ` Teraz je takto spárovaných ${amtCount} ${plur(amtCount,"faktúra","faktúry","faktúr")}.`;
+  const fuzCount = r.filter(x=>x.matchedBy==="vsfuzzy").length;
+  if(state.vsFuzzy && fuzCount) foot += ` Ďalších ${fuzCount} ${plur(fuzCount,"faktúra bola priradená","faktúry boli priradené","faktúr bolo priradených")} pri drobnej odchýlke VS (rovnaká suma, takmer rovnaký VS) – označené „≈ VS (overiť)“.`;
   foot += ` Kliknutím na riadok faktúry otvoríte jej PDF.`;
   $("#foot").textContent = foot;
 
@@ -697,6 +994,7 @@ function render(){
   if(d){ const w = d===1?"duplicitná faktúra bola preskočená":(d>=2&&d<=4)?"duplicitné faktúry boli preskočené":"duplicitných faktúr bolo preskočených";
     parts.push(`<b>${d}</b> ${w} (rovnaké číslo, VS, dátum vystavenia aj suma)`); }
   if((nt.unrecognized||[]).length) parts.push(`<b>${nt.unrecognized.length}</b> ${plur(nt.unrecognized.length,"súbor nevyzeral","súbory nevyzerali","súborov nevyzeralo")} ako faktúra a ${plur(nt.unrecognized.length,"bol vynechaný","boli vynechané","bolo vynechaných")}`);
+  if((nt.supersededCal||0)>0) parts.push(`<b>${nt.supersededCal}</b> ${plur(nt.supersededCal,"faktúra zo staršieho splátkového kalendára bola nahradená","faktúry zo staršieho splátkového kalendára boli nahradené","faktúr zo staršieho splátkového kalendára bolo nahradených")} novším`);
   if((nt.failed||[]).length) parts.push(`<b>${nt.failed.length}</b> ${plur(nt.failed.length,"súbor sa nepodarilo","súbory sa nepodarilo","súborov sa nepodarilo")} prečítať`);
   if(parts.length){
     nEl.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.6 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.6a2 2 0 0 0-3.4 0Z"/></svg><span>${parts.join(" · ")}.</span>`;
@@ -749,6 +1047,7 @@ function currentRows(){
 function statusChip(s){
   if(s==="paid"||s==="overpaid") return `<span class="chip paid"><i></i>${s==="overpaid"?"Preplatok":"Zaplatené"}</span>`;
   if(s==="partial") return `<span class="chip part"><i></i>Čiastočne</span>`;
+  if(s==="upcoming") return `<span class="chip upco"><i></i>Pred splatnosťou</span>`;
   return `<span class="chip unpaid"><i></i>Nezaplatené</span>`;
 }
 // zladí šírku vyhľadávania so šírkou bloku kariet (pravé okraje lícujú)
@@ -798,6 +1097,7 @@ function renderTable(){
       let mcell;
       if(x.matchedBy==="vs") mcell='<span class="chip paid"><i></i>Áno · VS</span>';
       else if(x.matchedBy==="amount") mcell='<span class="chip part"><i></i>Áno · suma</span>';
+      else if(x.matchedBy==="vsfuzzy") mcell='<span class="chip part" title="Suma sedí, ale variabilný symbol sa líši – priradené na overenie."><i></i>Áno · VS≈</span>';
       else mcell='<span class="chip" style="background:var(--surface-2);color:var(--ink-faint)"><i style="background:var(--ink-faint)"></i>Nie</span>';
       return `<tr>
         <td class="tnum">${x.date}</td>
@@ -808,7 +1108,13 @@ function renderTable(){
       </tr>`;
     }
     const warn = x.outside ? `<span class="warn" title="Splatnosť mimo obdobia nahraných výpisov – platba mohla prebehnúť inde.">!</span>` : "";
-    const approx = (x.matchedBy==="amount") ? `<span class="approx" title="Spárované podľa sumy, faktúra nemala platbu s rovnakým variabilným symbolom. Odporúčame overiť.">≈ podľa sumy</span>` : "";
+    let approx = "";
+    if(x.matchedBy==="amount") approx = `<span class="approx" title="Spárované podľa sumy, faktúra nemala platbu s rovnakým variabilným symbolom. Odporúčame overiť.">≈ podľa sumy</span>`;
+    else if(x.matchedBy==="vsfuzzy"){
+      const p = x.pays && x.pays[0];
+      const tip = p ? `Možná platba ${p.date} – suma sedí, ale VS sa líši (platba ${p.vs||"?"} · faktúra ${x.vs||"?"}). Odporúčame overiť.` : "Suma sedí, ale VS sa líši – overiť.";
+      approx = `<span class="approx" title="${esc(tip)}">≈ VS (overiť)</span>`;
+    }
     const clickable = x._buf ? ` class="clickable" data-ri="${idx}" title="Kliknutím otvoríte PDF faktúry"` : "";
     return `<tr${clickable}>
       <td><span class="fid">${esc(x.number||"—")}</span>${x._buf?'<span class="openico">↗</span>':''}</td>
@@ -853,6 +1159,120 @@ $("#tbody").addEventListener("click", e=>{
   if(x && x._buf) openInvoicePdf(x._buf);
 });
 $("#amt-toggle").onchange = e=>{ state.amountMatch=e.target.checked; reconcile(); render(); };
+$("#vsf-toggle").onchange = e=>{ state.vsFuzzy=e.target.checked; reconcile(); render(); };
+
+/* ---------- Detail firmy (zoskupenie podľa nájomcu + modal) ---------- */
+// normalizácia názvu firmy: malé písmená, odstránenie koncovej právnej formy a interpunkcie
+function normCompany(name){
+  if(!name) return "";
+  let s = String(name).toLowerCase().replace(/\u00a0/g," ");
+  s = s.replace(/[\s,]+(spol\.?\s*s\s*r\.?(?:\s*o\.?)?|s\.?\s*r\.?(?:\s*o\.?)?|a\.?\s*s\.?|k\.?\s*s\.?|v\.?\s*o\.?\s*s\.?|o\.?\s*z\.?)\s*$/i,"");
+  s = s.replace(/[.,;]/g," ").replace(/\s+/g," ").trim();
+  return s;
+}
+// zoskupí faktúry a platby podľa firmy; vráti pole zoradené podľa najväčšieho rozdielu
+function buildCompanies(){
+  const r = state.results || [];
+  const pays = (state.payments||[]).filter(p=>p.amount>0);
+  const companies = new Map();
+  const get = (key, disp) => { let c=companies.get(key); if(!c){ c={key, name:disp||"(bez názvu)", invoices:[], payments:[], paymentsOnly:false}; companies.set(key,c); } return c; };
+  // faktúry podľa normalizovaného mena
+  for(const inv of r){ const key=normCompany(inv.customer)||"(bez názvu)"; get(key, inv.customer).invoices.push(inv); }
+  // platba spárovaná s faktúrou → patrí firme tej faktúry (najsilnejší signál)
+  const payKey = new Map();
+  for(const inv of r){ const key=normCompany(inv.customer)||"(bez názvu)"; for(const p of inv.pays) payKey.set(p, key); }
+  // naučené mapovanie: bankové meno platiteľa → firma (zo spárovaných platieb).
+  // rieši preklepy/skrátenia banky (napr. "PROSKILS" vs faktúra "ProSkills"): spárované platby ukážu, komu meno patrí
+  const nameToCo = new Map();
+  for(const p of pays){ const k=payKey.get(p); if(k){ const nk=normCompany(p.name); if(nk && !nameToCo.has(nk)) nameToCo.set(nk,k); } }
+  const invKeys = [...companies.keys()];
+  for(const p of pays){
+    let key = payKey.get(p);
+    if(!key){
+      const pk = normCompany(p.name);
+      if(pk){
+        if(nameToCo.has(pk)) key = nameToCo.get(pk);         // to isté bankové meno už poznáme zo spárovanej platby
+        else if(companies.has(pk)) key = pk;                 // presná zhoda s menom na faktúre
+        else {   // skrátené meno z banky → zhoda na začiatok názvu, ale len ak sedí jednoznačne na jednu firmu
+          const m = invKeys.filter(k => k && (k.startsWith(pk)||pk.startsWith(k)) && Math.min(k.length,pk.length)>=4);
+          if(m.length===1) key = m[0];
+        }
+      }
+    }
+    if(key && companies.get(key)) companies.get(key).payments.push(p);
+    else { const pk="§"+(normCompany(p.name)||"neznáme"); const c=get(pk, p.name); c.paymentsOnly=true; c.payments.push(p); }
+  }
+  for(const c of companies.values()){
+    c.billed = c.invoices.reduce((s,x)=>s+(x.total||0),0);
+    c.upcoming = c.invoices.filter(x=>x.status==="upcoming").reduce((s,x)=>s+(x.total||0),0);
+    c.billedToDate = c.billed - c.upcoming;                         // vystavené splatné k dnešku (bez budúcich splátok)
+    c.dueCount = c.invoices.filter(x=>x.status!=="upcoming").length;
+    c.received = c.payments.reduce((s,x)=>s+x.amount,0);
+    c.unmatched = c.payments.filter(p=>!p.matchedBy).reduce((s,x)=>s+x.amount,0);   // suma platieb bez priradenej faktúry
+    c.unmatchedCount = c.payments.filter(p=>!p.matchedBy).length;
+    c.diff = c.billedToDate - c.received;                           // koľko reálne dlhujú k dnešnému dňu (net)
+    c.overdue = c.invoices.filter(x=>x.status==="unpaid").reduce((s,x)=>s+(x.total||0),0);
+  }
+  // v zozname ponecháme len firmy s aspoň jednou vystavenou faktúrou (nie skupiny len s platbami)
+  return [...companies.values()].filter(c=>c.invoices.length>0).sort((a,b)=> b.diff - a.diff);
+}
+function payMini(mb){
+  if(mb==="vs") return '<span class="chip paid"><i></i>Áno · VS</span>';
+  if(mb==="amount") return '<span class="chip part"><i></i>Áno · suma</span>';
+  if(mb==="vsfuzzy") return '<span class="chip part"><i></i>Áno · VS≈</span>';
+  return '<span class="chip" style="background:var(--surface-2);color:var(--ink-faint)"><i style="background:var(--ink-faint)"></i>Nie</span>';
+}
+function renderCompany(c){
+  if(!c){ $("#co-summary").innerHTML=""; $("#co-invoices").innerHTML=""; $("#co-payments").innerHTML=""; return; }
+  const dcls = c.diff>0.005?"neg":(c.diff<-0.005?"pos":"");
+  const dsub = c.diff>0.005?"ešte čakáme":(c.diff<-0.005?"preplatok":"vyrovnané");
+  const t=new Date(); const dstr = t.getDate()+"."+(t.getMonth()+1)+"."+t.getFullYear();
+  const nb = s => s.replace(/\s/g,"\u00a0");   // pevné medzery → riadok sa nezalomí
+  $("#co-summary").innerHTML =
+    `<div class="co-stat" title="Súčet všetkých faktúr vystavených tejto firme – vrátane budúcich splátok."><div class="k">Vystavené celkom</div><div class="v">${fmtEur(c.billed)}</div><div class="sub">${c.invoices.length} ${plur(c.invoices.length,"faktúra","faktúry","faktúr")}</div></div>`+
+    `<div class="co-stat" title="Faktúry splatné do dnešného dňa (bez budúcich splátok) – to, čo už malo byť zaplatené."><div class="k">Vystavené k dnešnému dňu</div><div class="v">${fmtEur(c.billedToDate)}</div><div class="sub">k ${dstr} · ${c.dueCount} ${plur(c.dueCount,"faktúra","faktúry","faktúr")}</div></div>`+
+    `<div class="co-stat" title="Všetky platby prijaté od firmy – vrátane tých, ktoré sa nepodarilo priradiť k žiadnej faktúre."><div class="k">Prijaté spolu</div><div class="v">${fmtEur(c.received)}</div><div class="sub">${c.payments.length} ${plur(c.payments.length,"platba","platby","platieb")}</div>${c.unmatched>0.005?`<div class="sub warn">${nb("nespárované: "+fmtEur(c.unmatched))}</div>`:""}</div>`+
+    `<div class="co-stat ${dcls}" title="Vystavené k dnešku mínus všetko prijaté – koľko reálne chýba na účte (záporné = preplatok)."><div class="k">Rozdiel (dlžia k dnešku)</div><div class="v">${fmtEur(c.diff)}</div><div class="sub">${dsub}</div></div>`+
+    `<div class="co-stat" title="Faktúry po termíne, ktoré nemajú priradenú platbu (štítok Nezaplatené) – pohľad podľa faktúr."><div class="k">Po splatnosti</div><div class="v">${fmtEur(c.overdue)}</div><div class="sub">nezaplatené</div></div>`+
+    `<div class="co-stat" title="Faktúry, ktorých splatnosť ešte len príde – budúce splátky."><div class="k">Pred splatnosťou</div><div class="v">${fmtEur(c.upcoming)}</div><div class="sub">ešte nesplatné</div></div>`;
+  const invs = c.invoices.slice().sort((a,b)=>{ const da=parseDate(a.due),db=parseDate(b.due); return (da?da.getTime():0)-(db?db.getTime():0); });
+  state._coInvoices = invs;
+  $("#co-inv-count").textContent = "("+invs.length+")";
+  $("#co-invoices").innerHTML = invs.length ? invs.map((x,i)=>{
+    const clk = x._buf ? ` class="co-item clickable" data-ci="${i}" title="Kliknutím otvoríte PDF faktúry"` : ` class="co-item"`;
+    return `<div${clk}><div class="co-item-main"><span class="co-num">${esc(x.number||x.vs||"—")}</span>${x._buf?'<span class="openico">↗</span>':''}<span class="co-due">${x.due||""}</span></div>`+
+    `<div class="co-item-side">${fmtEur(x.total||0)} ${statusChip(x.status)}</div></div>`;
+  }).join("") : `<div class="co-empty">Žiadne faktúry v systéme</div>`;
+  const ps = c.payments.slice().sort((a,b)=>(b.dateObj?b.dateObj.getTime():0)-(a.dateObj?a.dateObj.getTime():0));
+  $("#co-pay-count").textContent = "("+ps.length+")";
+  $("#co-payments").innerHTML = ps.length ? ps.map(p=>
+    `<div class="co-item${p.matchedBy?"":" unmatched"}"><div class="co-item-main"><span class="co-date">${p.date||""}</span><span class="co-vs">VS ${p.vs||"—"}</span></div>`+
+    `<div class="co-item-side">${fmtEur(p.amount)} ${payMini(p.matchedBy)}</div></div>`).join("") : `<div class="co-empty">Žiadne prijaté platby</div>`;
+}
+function openCompanyModal(){
+  const companies = buildCompanies();
+  state._companies = companies;
+  const sel = $("#co-select");
+  if(!companies.length){ sel.innerHTML=""; renderCompany(null); }
+  else {
+    sel.innerHTML = companies.map((c,i)=>`<option value="${i}">${esc(c.name)}${c.paymentsOnly?" · len platby":""} — rozdiel ${fmtEur(c.diff)}</option>`).join("");
+    let idx=0; const q=normCompany(state.search||"");
+    if(q){ const f=companies.findIndex(c=> normCompany(c.name).includes(q) || q.includes(normCompany(c.name))); if(f>=0) idx=f; }
+    sel.value=idx; renderCompany(companies[idx]);
+  }
+  $("#co-modal").style.display="flex";
+}
+function closeCompanyModal(){ $("#co-modal").style.display="none"; }
+$("#co-detail").onclick = openCompanyModal;
+$("#co-close").onclick = closeCompanyModal;
+$("#co-select").onchange = e=>{ const c=(state._companies||[])[+e.target.value]; renderCompany(c); };
+$("#co-invoices").addEventListener("click", e=>{
+  const el = e.target.closest("[data-ci]"); if(!el) return;
+  const x = (state._coInvoices||[])[+el.dataset.ci];
+  if(x && x._buf) openInvoicePdf(x._buf);
+});
+$("#co-modal").addEventListener("click", e=>{ if(e.target.id==="co-modal") closeCompanyModal(); });
+document.addEventListener("keydown", e=>{ if(e.key==="Escape" && $("#co-modal").style.display==="flex") closeCompanyModal(); });
 
 $("#csv").onclick = async ()=>{
   const defs=[
@@ -890,6 +1310,7 @@ function tabCells(tab, rows){
     const dataRows=rows.map(x=>{
       let pr = x.matchedBy==="vs" ? {v:"Áno · VS",k:"st-paid"}
              : x.matchedBy==="amount" ? {v:"Áno · suma",k:"st-partial"}
+             : x.matchedBy==="vsfuzzy" ? {v:"Áno · VS≈ (overiť)",k:"st-partial"}
              : {v:"Nie",k:"muted"};
       return [{v:x.date,k:"center"},{v:x.name,k:"text"},{v:x.amount,k:"money"},{v:x.vs||"",k:"center"},pr];
     });
@@ -897,9 +1318,9 @@ function tabCells(tab, rows){
   }
   const cols=[{t:"Faktúra",w:14},{t:"Odberateľ",w:34},{t:"Suma (€)",w:14},{t:"Splatnosť",w:12},
         {t:"Stav",w:15},{t:"Zaplatené (€)",w:14},{t:"Dátum platby",w:13},{t:"VS",w:14},{t:"Spárované podľa",w:16}];
-  const lbl={paid:"Zaplatené",overpaid:"Preplatok",partial:"Čiastočne",unpaid:"Nezaplatené"};
-  const stK={paid:"st-paid",overpaid:"st-paid",partial:"st-partial",unpaid:"st-unpaid"};
-  const mlbl={vs:"VS",amount:"suma (overiť)"};
+  const lbl={paid:"Zaplatené",overpaid:"Preplatok",partial:"Čiastočne",unpaid:"Nezaplatené",upcoming:"Pred splatnosťou"};
+  const stK={paid:"st-paid",overpaid:"st-paid",partial:"st-partial",unpaid:"st-unpaid",upcoming:"st-upcoming"};
+  const mlbl={vs:"VS",amount:"suma (overiť)",vsfuzzy:"VS≈ (overiť)"};
   const dataRows=rows.map(x=>[
     {v:x.number||"",k:"center"},{v:x.customer,k:"text"},{v:x.total,k:"money"},{v:x.due||"",k:"center"},
     {v:lbl[x.status]||"",k:stK[x.status]||"center"},
@@ -913,32 +1334,34 @@ function xmlEsc(s){ return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&l
 function colName(i){ let s=""; i++; while(i>0){ const m=(i-1)%26; s=String.fromCharCode(65+m)+s; i=(i-(m+1))/26|0; } return s; }
 
 async function buildXlsx(sheets){
-  const STY={header:1,text:2,money:3,center:4,"st-unpaid":5,"st-paid":6,"st-partial":7,muted:8};
+  const STY={header:1,text:2,money:3,center:4,"st-unpaid":5,"st-paid":6,"st-partial":7,muted:8,"st-upcoming":9};
   const styles='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
     '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'+
     '<numFmts count="1"><numFmt numFmtId="164" formatCode="#,##0.00\\ &quot;€&quot;"/></numFmts>'+
-    '<fonts count="6">'+
+    '<fonts count="7">'+
     '<font><sz val="11"/><name val="Calibri"/></font>'+
     '<font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font>'+
     '<font><b/><sz val="11"/><color rgb="FFC42A45"/><name val="Calibri"/></font>'+
     '<font><b/><sz val="11"/><color rgb="FF0E8A55"/><name val="Calibri"/></font>'+
     '<font><b/><sz val="11"/><color rgb="FFB16500"/><name val="Calibri"/></font>'+
     '<font><sz val="11"/><color rgb="FF98A2B3"/><name val="Calibri"/></font>'+
+    '<font><b/><sz val="11"/><color rgb="FF5A6473"/><name val="Calibri"/></font>'+
     '</fonts>'+
-    '<fills count="6">'+
+    '<fills count="7">'+
     '<fill><patternFill patternType="none"/></fill>'+
     '<fill><patternFill patternType="gray125"/></fill>'+
     '<fill><patternFill patternType="solid"><fgColor rgb="FF1F2A3D"/></patternFill></fill>'+
     '<fill><patternFill patternType="solid"><fgColor rgb="FFFBE7EB"/></patternFill></fill>'+
     '<fill><patternFill patternType="solid"><fgColor rgb="FFE5F3EC"/></patternFill></fill>'+
     '<fill><patternFill patternType="solid"><fgColor rgb="FFFAF0DD"/></patternFill></fill>'+
+    '<fill><patternFill patternType="solid"><fgColor rgb="FFEDF0F5"/></patternFill></fill>'+
     '</fills>'+
     '<borders count="2">'+
     '<border><left/><right/><top/><bottom/><diagonal/></border>'+
     '<border><left style="thin"><color rgb="FFD0D5DD"/></left><right style="thin"><color rgb="FFD0D5DD"/></right><top style="thin"><color rgb="FFD0D5DD"/></top><bottom style="thin"><color rgb="FFD0D5DD"/></bottom><diagonal/></border>'+
     '</borders>'+
     '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'+
-    '<cellXfs count="9">'+
+    '<cellXfs count="10">'+
     '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'+
     '<xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>'+
     '<xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center"/></xf>'+
@@ -948,6 +1371,7 @@ async function buildXlsx(sheets){
     '<xf numFmtId="0" fontId="3" fillId="4" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>'+
     '<xf numFmtId="0" fontId="4" fillId="5" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>'+
     '<xf numFmtId="0" fontId="5" fillId="0" borderId="1" xfId="0" applyFont="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>'+
+    '<xf numFmtId="0" fontId="6" fillId="6" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>'+
     '</cellXfs>'+
     '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>'+
     '</styleSheet>';
@@ -1025,7 +1449,7 @@ function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("sh
 
 $("#reset").onclick = ()=>{
   state.faktFiles=[]; state.vypFiles=[]; state.invoices=[]; state.payments=[]; state.results=[];
-  renderFiles(); updateRun(); $("#results").classList.remove("show"); $("#status").textContent="";
+  renderFiles(); updateRun(); $("#results").classList.remove("show"); $("#status").textContent=""; $("#status-file").textContent="";
 };
 
 /* ---------- init ---------- */
